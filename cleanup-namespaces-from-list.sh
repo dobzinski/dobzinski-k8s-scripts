@@ -16,10 +16,9 @@ RUN=0    # do not execute, remember to enable debug
 # run
 if [ $DEBUG -ne 0 ]; then
   echo ""
-  echo "---"
-  date +"%Y-%m-%d %H:%M:%S"
+  echo "Starting script to remove Namespaces from the list ..."
   echo ""
-  echo "Starting script to safe remove Namespaces from the list ..."
+  date +"%Y-%m-%d %H:%M:%S"
   echo ""
 fi
 if [[ -f "$FILE" ]]; then
@@ -128,6 +127,7 @@ if [ $DEBUG -ne 0 ]; then
   echo "Script completed!"
   echo ""
   date +"%Y-%m-%d %H:%M:%S"
+  echo ""
   echo "---"
   echo ""
 fi
