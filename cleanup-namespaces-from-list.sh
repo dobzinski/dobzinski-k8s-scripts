@@ -22,7 +22,7 @@ if [ $DEBUG -ne 0 ]; then
   echo ""
 fi
 if [[ -f "$FILE" ]]; then
-  mapfile -t LIST < <(sed 's/^[[:space:]]*//' "$FILE" | sort -u)
+  mapfile -t LIST < <(sed 's/^[[:space:]]*//; s/[[:space:]]*$//' "$FILE" | sort -u)
   if [[ ${#LIST[@]} -gt 0 ]]; then
     for ns in "${LIST[@]}"; do
       [[ -z "$ns" ]] && continue
