@@ -20,7 +20,7 @@ P2="$2" # Inform using the second parameter
 # Option 2: List of Namespaces from file
 #FILE="my-namespaces.txt"
 #if [[ -f "$FILE" ]]; then
-#  mapfile -t LIST < <(sed 's/^[[:space:]]*//' "$FILE" | sort -u)
+#  mapfile -t LIST < <(sed 's/^[[:space:]]*//; s/[[:space:]]*$//' "$FILE" | sort -u)
 #fi
 
 # Option 3: Dynamic Namespaces (get Kubernetes list)
