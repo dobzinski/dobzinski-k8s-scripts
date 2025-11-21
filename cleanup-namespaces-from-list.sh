@@ -1,11 +1,11 @@
 #!/usr/bin/bash
-#################################################
+##########################################################
 #
 # Script to clear the Kubernetes Namespace
 #  - by: Robson Dobzinski
 #  - review: 2025-11-21
 #
-#################################################
+##########################################################
 
 # vars
 FILE=/path/my-namespaces-list-file
@@ -131,3 +131,4 @@ if [ $DEBUG -ne 0 ]; then
   echo "---"
   echo ""
 fi
+exit 0
