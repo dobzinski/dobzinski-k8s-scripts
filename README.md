@@ -10,7 +10,7 @@ Scripts developed for use in Kubernetes.
 
 ## <a id="automatedvelero" />automated-velero.sh
 
-[Download](./automated-velero.sh)
+[Open](./automated-velero.sh)
 
 **About**
 
@@ -37,7 +37,7 @@ $ ./automated-velero.sh restore 2025112101
 
 ## <a id="cleanupnamespacesfromlist" />cleanup-namespaces-from-list.sh
 
-[Download](./cleanup-namespaces-from-list.sh)
+[Open](./cleanup-namespaces-from-list.sh)
 
 **About**
 
