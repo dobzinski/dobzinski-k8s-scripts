@@ -60,7 +60,7 @@ $ ./cleanup-namespaces-from-list.sh
 ```
 
 
-## <a id="countresourcesnamespaces" />count_resources_namespaces.sh
+## <a id="countresourcesnamespaces" />count-resources-namespaces.sh
 
 [Open](./count-resources-namespaces.sh)
 
