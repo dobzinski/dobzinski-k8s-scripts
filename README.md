@@ -5,7 +5,8 @@ Scripts developed for use in Kubernetes.
 | Script | Information |
 | ----- | ----------- |
 | [automated-velero.sh](#automatedvelero) | Script to automate Namespace backups and restores using Velero |
-| [cleanup-namespaces-from-list.sh](#cleanupnamespacesfromlist) | Safe cleaning up the Namespace from external list file |
+| [cleanup-namespaces.sh](#cleanupnamespaces) | Safe cleaning up the Namespace from external list file |
+| [count-resources-namespaces.sh](#countresourcesnamespaces) | Safe cleaning up the Namespace from external list file |
 
 
 ## <a id="automatedvelero" />automated-velero.sh
@@ -35,9 +36,9 @@ $ ./automated-velero.sh restore 2025112101
 ```
 
 
-## <a id="cleanupnamespacesfromlist" />cleanup-namespaces-from-list.sh
+## <a id="cleanupnamespaces" />cleanup-namespacest.sh
 
-[Open](./cleanup-namespaces-from-list.sh)
+[Open](./cleanup-namespaces.sh)
 
 **About**
 
@@ -59,3 +60,66 @@ $ ./cleanup-namespaces-from-list.sh
 ```
 
 
+## <a id="countresourcesnamespaces" />count_resources_namespaces.sh
+
+[Open](./count-resources-namespaces.sh)
+
+**About**
+
+Make sure you have the "kubectl" binary installed and exported to the "PATH". You also need to export the KUBECONFIG file.
+
+This script will be create a table with count resources in Kubernetes Namespaces, using an external list of namespaces from a file.
+
+**How to use**
+
+You need to create a new file and insert the namespaces to be deleted on each line. Then, open the script file to add this new external file to the "FILE" variable and remember to change the execution permissions
+
+```
+$ vi my-namespace-list
+$ vi count-resources-namespaces.sh
+$ chmod +x count-resources-namespaces.sh
+```
+
+References:
+```
+ 1 : ROW : Line Number
+ 2 : NMS : Namespace
+ 3 : SVC : Service
+ 4 : ING : Ingress
+ 5 : DEP : Deployment
+ 6 : DST : Daemonset
+ 7 : RST : Replicaset
+ 8 : SST : Statefulset
+ 9 : JOB : Job
+10 : CJB : Cronjob
+11 : PDR : Pods Running
+12 : PDC : Pods Completed
+13 : PDE : Pods not Running
+14 : PVB : PVC Bound
+15 : PVE : PVC not Bound
+```
+
+Example 1: Simple execution and formatting of the result in a table
+```
+$ ./cleanup-namespaces-from-list.sh
+```
+
+Example 2: The same as in "Example 1", but saving the result to an external file in /tmp
+```
+$ ./cleanup-namespaces-from-list.sh > /tmp/result.log
+```
+Example 3: Use the output from the "Example 2" file to format the data, selecting the columns you want to view
+```
+cat /tmp/result.log | tail -n +6 | awk '
+    /References:/ { exit } # Stop on line with "References:"
+    /^[[:space:]]*$/ { next } # Remove empty lines
+    /^[[:space:]]*-{3,}[[:space:]]*$/ { next } # Remove formatting lines with "----"
+    { print $2 " | " $11 " | " $13 " | " $14 " | " $15 } # Displaying only the selected columns
+'
+
+Output:
+NMS | PDR | PDE | PVB | PVE
+ingress-nginx | 3 | 0 | 0 | 0
+kube-system | 24 | 0 | 0 | 0
+myapp1 | 1 | 0 | 1 | 0
+```
