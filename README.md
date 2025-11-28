@@ -4,9 +4,9 @@ Scripts developed for use in Kubernetes.
 
 | Script | Information |
 | ----- | ----------- |
-| [automated-velero.sh](#automatedvelero) | Script to automate Namespace backups and restores using Velero |
-| [cleanup-namespaces.sh](#cleanupnamespaces) | Safe cleaning up the Namespace from external list file |
-| [count-resources-namespaces.sh](#countresourcesnamespaces) | Safe cleaning up the Namespace from external list file |
+| [automated-velero.sh](#automatedvelero) | Script to automate Namespaces backups and restores using Velero |
+| [cleanup-namespaces.sh](#cleanupnamespaces) | Safe cleaning up the Namespaces from external list file |
+| [count-resources-namespaces.sh](#countresourcesnamespaces) | Creation of a table for counting resources in Namespaces using an external list file |
 
 
 ## <a id="automatedvelero" />automated-velero.sh
@@ -68,7 +68,9 @@ $ ./cleanup-namespaces-from-list.sh
 
 Make sure you have the "kubectl" binary installed and exported to the "PATH". You also need to export the KUBECONFIG file.
 
-This script will be create a table with count resources in Kubernetes Namespaces, using an external list of namespaces from a file.
+This script will be create a table with count resources in Kubernetes Namespaces, using an external list of namespaces from a file. 
+
+Useful for comparing environments after migration!
 
 **How to use**
 
