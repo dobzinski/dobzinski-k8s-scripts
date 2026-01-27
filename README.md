@@ -36,6 +36,26 @@ $ ./automated-velero.sh backup 2025112101
 $ ./automated-velero.sh restore 2025112101
 ```
 
+## <a id="checknodeenvironment" />check_node_environment.sh
+
+[Open](./check_node_environment.sh)
+
+**About**
+
+This script performs pre-flight validation checks for servers intended to run Rancher and RKE2.
+
+Its goal is to detect common misconfigurations and missing prerequisites before installation, helping system administrators avoid deployment failures, unstable clusters, or unsupported environments.
+
+**How to use**
+
+After downloading, open the script file, check all variables, and change the execution permissions.
+
+```
+$ vi check_node_environment.sh
+$ chmod +x check_node_environment.sh
+$ ./check_node_environment.sh
+```
+
 
 ## <a id="cleanupnamespaces" />cleanup-namespacest.sh
 
