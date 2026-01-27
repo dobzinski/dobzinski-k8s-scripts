@@ -5,6 +5,7 @@ Scripts developed for use in Kubernetes.
 | Script | Information |
 | ----- | ----------- |
 | [automated-velero.sh](#automatedvelero) | Script to automate Namespaces backups and restores using Velero |
+| [check_node_environment.sh](#checknodeenvironment) | Script to check Rancher/RKE2 OS environment |
 | [cleanup-namespaces.sh](#cleanupnamespaces) | Safe cleaning up the Namespaces from external list file |
 | [count-resources-namespaces.sh](#countresourcesnamespaces) | Creation of a table for counting resources in Namespaces using an external list file |
 
