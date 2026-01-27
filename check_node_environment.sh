@@ -167,18 +167,6 @@ else
     result "Swap disabled (${SWAP_MB}MB enabled)" "FAIL"
 fi
 
-# seLinux
-SELINUX_STATUS=$(getenforce 2>/dev/null || echo "Unknown")
-if [ "$SELINUX_STATUS" != "Unknown" ]; then
-    if [ "$SELINUX_STATUS" = "Disabled" ]; then
-        result "SELinux (${SELINUX_STATUS})" "PASS"
-    else
-        result "SELinux (${SELINUX_STATUS})" "FAIL"
-    fi
-else
-    result "SELinux not installed" "PASS"
-fi
-
 # firewalld
 if systemctl list-unit-files | grep -q '^firewalld\.service'; then
     FIREWALLD_ENABLED=$(systemctl is-enabled firewalld 2>/dev/null)
@@ -190,6 +178,18 @@ if systemctl list-unit-files | grep -q '^firewalld\.service'; then
     fi
 else
     result "Firewalld not installed" "PASS"
+fi
+
+# seLinux (check enabled)
+SELINUX_STATUS=$(getenforce 2>/dev/null || echo "Unknown")
+if [ "$SELINUX_STATUS" != "Unknown" ]; then
+    if [ "$SELINUX_STATUS" = "Disabled" ]; then
+        result "SELinux (${SELINUX_STATUS})" "FAIL"
+    else
+        result "SELinux (${SELINUX_STATUS})" "PASS"
+    fi
+else
+    result "SELinux not installed" "FAIL"
 fi
 
 # apparmor
