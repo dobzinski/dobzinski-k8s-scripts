@@ -12,7 +12,7 @@ ENV_PROFILE=1            # 1=small, 2=medium, 3=large
 IGNORE_PROFILE=0         # 1=enabled, 0=disabled
 CHECK_CPU=8              # IGNORE_PROFILE needs to be set to 1
 CHECK_MEM_MB=32768       # IGNORE_PROFILE needs to be set to 1
-CHECK_DISK_GB=35         # IGNORE_PROFILE needs to be set to 1
+CHECK_DISK_GB=40         # IGNORE_PROFILE needs to be set to 1
 
 # os
 CHECK_OS_ID="ol"         # id=sles|opensuse-leap|ol|rhel|rocky|ubuntu
