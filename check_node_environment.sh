@@ -3,7 +3,7 @@
 #
 # Script to check the Rancher/RKE2 Operating System
 #  - by: Robson Dobzinski
-#  - review: 2026-01-27
+#  - review: 2026-01-28
 #
 ################################################################
 
@@ -12,7 +12,7 @@ ENV_PROFILE=1            # 1=small, 2=medium, 3=large
 IGNORE_PROFILE=0         # 1=enabled, 0=disabled
 CHECK_CPU=8              # IGNORE_PROFILE needs to be set to 1
 CHECK_MEM_MB=32768       # IGNORE_PROFILE needs to be set to 1
-CHECK_DISK=60            # IGNORE_PROFILE needs to be set to 1
+CHECK_DISK_GB=35         # IGNORE_PROFILE needs to be set to 1
 
 # os
 CHECK_OS_ID="ol"         # id=sles|opensuse-leap|ol|rhel|rocky|ubuntu
@@ -21,8 +21,16 @@ CHECK_OS_VERSION="9.4"   # version
 # network
 DISABLE_IPV6=1           # 1=enabled, 0=disabled
 
-# /var
+# list of interfaces for verification
+INTERFACES_LIST=(
+    "enp1s0"
+)
+
+# /var with mount point
 MOUNT_VAR=1              # 1=enabled, 0=disabled
+
+# available space in /var
+VAR_DISK_GB=100
 
 # data in /var (MOUNT_VAR needs to be set to 1)
 #VAR_DATA=(
@@ -108,7 +116,7 @@ if [ "$IGNORE_PROFILE" = 0 ]; then
 else
     REQUIRED_CPU=$CHECK_CPU
     REQUIRED_MEM_MB=$CHECK_MEM_MB
-    MINIMUM_DISK_SPACE=$CHECK_DISK
+    MINIMUM_DISK_SPACE=$CHECK_DISK_GB
     echo ""
     echo "Rancher profile: Custom"
     echo ""
@@ -133,6 +141,16 @@ result() {
     else
         echo -e " [ ${RED}FAIL${NC} ]"
     fi
+}
+
+# check item in list
+in_list() {
+    local needle="$1"
+    shift
+    for item in "$@"; do
+        [ "$item" = "$needle" ] && return 0
+    done
+    return 1
 }
 
 # os
@@ -192,11 +210,48 @@ else
     result "SELinux not installed" "FAIL"
 fi
 
-# apparmor
-if [ -d /sys/kernel/security/apparmor ] || command -v apparmor_status >/dev/null 2>&1; then
-    result "AppArmor disabled" "FAIL"
+# apparmor (check disabled)
+if command -v apparmor_status >/dev/null 2>&1; then
+    if apparmor_status | grep -q "profiles are loaded"; then
+        result "AppArmor enabled" "FAIL"
+    else
+        result "AppArmor disabled" "PASS"
+    fi
 else
     result "AppArmor not installed" "PASS"
+fi
+
+# interfaces
+#LIST_IFACES=$(ls /sys/class/net | grep -Ev '^(lo|docker|cni|veth|flannel|kube|vxlan|cali)')
+LIST_IFACES=$(find /sys/class/net -mindepth 1 -maxdepth 1 -printf '%f\n' \
+                 | grep -Ev '^(lo|docker|cni|veth|flannel|kube|vxlan|cali)')
+TOTAL_INTERFACES=0
+INTERFACES=""
+if [ -n "$LIST_IFACES" ]; then
+    for IFACE in $LIST_IFACES; do
+        if [ $TOTAL_INTERFACES -eq 0 ]; then
+            INTERFACES="${IFACE}"
+        else
+            INTERFACES+=",${IFACE}"
+        fi
+        ((TOTAL_INTERFACES++))
+    done
+    # total interfaces
+    if [ $TOTAL_INTERFACES -eq ${#INTERFACES_LIST[@]} ]; then
+        result "Total configured interfaces ($TOTAL_INTERFACES/${#INTERFACES_LIST[@]})" "PASS"
+    else
+        result "Total configured interfaces ($TOTAL_INTERFACES/${#INTERFACES_LIST[@]})" "FAIL"
+    fi
+    # interfaces list verification
+    if [ -n "$LIST_IFACES" ]; then
+        for IFACE in $LIST_IFACES; do
+            if in_list "$IFACE" "${INTERFACES_LIST[@]}"; then
+                result "Interface identified (${IFACE})" "PASS"
+            else
+                result "Unidentified interface (${IFACE})" "FAIL"
+            fi
+        done
+    fi
 fi
 
 # reverse dns
@@ -211,7 +266,7 @@ else
     PTR_FULL=$(getent hosts "$PRIMARY_IP" | awk '{print $2; exit}')
 fi
 PTR_SHORT=${PTR_FULL%%.*}
-if [ ! -z "$PTR_FULL" ]; then
+if [ -n "$PTR_FULL" ]; then
     if [[ -n "$PTR_SHORT" && "$PTR_SHORT" == "$HOST_SHORT" ]]; then
         result "Reverse DNS ($REVERSE_COMMAND: $PRIMARY_IP → $PTR_SHORT)" "PASS"
     else
@@ -242,13 +297,14 @@ fi
 # ipv6 check
 if [ "$DISABLE_IPV6" -gt 0 ]; then
     IPV6_FOUND=0
-    LIST_IFACES=$(ls /sys/class/net | grep -Ev '^(lo|docker|cni|veth|flannel|kube|vxlan|cali)')
-    for IFACE in $LIST_IFACES; do
-        if ip addr show dev "$IFACE" | grep -q 'inet6'; then
-            IPV6_FOUND=1
-            break
-        fi
-    done
+    if [ -n "$LIST_IFACES" ]; then
+        for IFACE in $LIST_IFACES; do
+            if ip addr show dev "$IFACE" | grep -q 'inet6'; then
+                IPV6_FOUND=1
+                break
+            fi
+        done
+    fi
     if [ "$IPV6_FOUND" -gt 0 ]; then
         result "IPv6 disabled on interfaces" "FAIL"
     else
@@ -267,9 +323,9 @@ fi
 # file system in /
 ROOT_FS=$(findmnt -n -o FSTYPE /)
 if [ "$ROOT_FS" = "xfs" ] || [ "$ROOT_FS" = "ext4" ] || [ "$ROOT_FS" = "btrfs" ]; then
-    result "File system in / ($ROOT_FS)" "PASS"
+    result "File system type in / ($ROOT_FS)" "PASS"
 else
-    result "File system in / ($ROOT_FS)" "FAIL"
+    result "File system type in / ($ROOT_FS)" "FAIL"
 fi
 
 # space in /
@@ -284,19 +340,22 @@ fi
 if [ "$MOUNT_VAR" -gt 0 ]; then
     # file system in /var
     VAR_FS=$(findmnt -n -o FSTYPE /var)
-    if [ ! -z "$VAR_FS" ]; then
-        if [ "$VAR_FS" = "xfs" ] || [ "$VAR_FS" = "ext4" ] || [ "$ROOT_FS" = "btrfs" ]; then
-            result "File system in /var ($VAR_FS)" "PASS"
+    if mountpoint -q /var; then
+        result "/var mounted" "PASS"
+        if [ "$VAR_FS" = "xfs" ] || [ "$VAR_FS" = "ext4" ] || [ "$VAR_FS" = "btrfs" ]; then
+            result "File system type in /var ($VAR_FS)" "PASS"
         else
-            result "File system in /var ($VAR_FS)" "FAIL"
+            result "File system type in /var ($VAR_FS)" "FAIL"
         fi
         # space in /var
         VAR_FREE_GB=$(df -BG --output=avail /var | tail -1 | tr -dc '0-9')
-        if [ "$VAR_FREE_GB" -ge $MINIMUM_DISK_SPACE ]; then
-            result "Free disk space /var (${VAR_FREE_GB}GB/${MINIMUM_DISK_SPACE}GB)" "PASS"
+        if [ "$VAR_FREE_GB" -ge $VAR_DISK_GB ]; then
+            result "Free disk space /var (${VAR_FREE_GB}GB/${VAR_DISK_GB}GB)" "PASS"
         else
-            result "Free disk space /var (${VAR_FREE_GB}GB/${MINIMUM_DISK_SPACE}GB)" "FAIL"
+            result "Free disk space /var (${VAR_FREE_GB}GB/${VAR_DISK_GB}GB)" "FAIL"
         fi
+    else
+        result "/var not mounted" "FAIL"
     fi
     # checking data in /var
     VAR_MISSING=0
