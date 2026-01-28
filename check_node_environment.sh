@@ -211,7 +211,7 @@ else
     PTR_FULL=$(getent hosts "$PRIMARY_IP" | awk '{print $2; exit}')
 fi
 PTR_SHORT=${PTR_FULL%%.*}
-if [ ! -z "$PTR_FULL"]; then
+if [ ! -z "$PTR_FULL" ]; then
     if [[ -n "$PTR_SHORT" && "$PTR_SHORT" == "$HOST_SHORT" ]]; then
         result "Reverse DNS ($REVERSE_COMMAND: $PRIMARY_IP → $PTR_SHORT)" "PASS"
     else
@@ -284,7 +284,7 @@ fi
 if [ "$MOUNT_VAR" -gt 0 ]; then
     # file system in /var
     VAR_FS=$(findmnt -n -o FSTYPE /var)
-    if [ ! -z $VAR_FS ]; then
+    if [ ! -z "$VAR_FS" ]; then
         if [ "$VAR_FS" = "xfs" ] || [ "$VAR_FS" = "ext4" ] || [ "$ROOT_FS" = "btrfs" ]; then
             result "File system in /var ($VAR_FS)" "PASS"
         else
