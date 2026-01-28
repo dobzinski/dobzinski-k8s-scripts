@@ -198,7 +198,7 @@ else
     result "Firewalld not installed" "PASS"
 fi
 
-# seLinux (check enabled)
+# seLinux (check enforcing or permissive)
 SELINUX_STATUS=$(getenforce 2>/dev/null || echo "Unknown")
 if [ "$SELINUX_STATUS" != "Unknown" ]; then
     if [ "$SELINUX_STATUS" = "Disabled" ]; then
