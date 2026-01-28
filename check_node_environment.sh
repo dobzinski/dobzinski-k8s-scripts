@@ -341,7 +341,7 @@ if [ "$MOUNT_VAR" -gt 0 ]; then
     # file system in /var
     VAR_FS=$(findmnt -n -o FSTYPE /var)
     if mountpoint -q /var; then
-        result "/var mounted" "PASS"
+        result "Partition /var mounted" "PASS"
         if [ "$VAR_FS" = "xfs" ] || [ "$VAR_FS" = "ext4" ] || [ "$VAR_FS" = "btrfs" ]; then
             result "File system type in /var ($VAR_FS)" "PASS"
         else
@@ -355,7 +355,7 @@ if [ "$MOUNT_VAR" -gt 0 ]; then
             result "Free disk space /var (${VAR_FREE_GB}GB/${VAR_DISK_GB}GB)" "FAIL"
         fi
     else
-        result "/var not mounted" "FAIL"
+        result "Partition /var not mounted" "FAIL"
     fi
     # checking data in /var
     VAR_MISSING=0
