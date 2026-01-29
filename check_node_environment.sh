@@ -26,6 +26,11 @@ INTERFACES_LIST=(
     "enp1s0"
 )
 
+# nfs sharing
+NFS_SERVER="nfsserver.domain"
+NFS_PATH="/path/to/nfs_sharing"
+NFS_MOUNT="/tmp/script_checking_nfs_access"
+
 # /var with mount point
 MOUNT_VAR=1              # 1=enabled, 0=disabled
 
@@ -370,6 +375,41 @@ if [ "$MOUNT_VAR" -gt 0 ]; then
     else
         result "System data in /var" "FAIL"
     fi
+fi
+
+# nfs support
+if [ -n "$NFS_SERVER" ] && [ -n "$NFS_PATH" ] && [ -n "$NFS_MOUNT" ]; then
+    if command -v mount.nfs >/dev/null 2>&1; then
+        result "NFS mount support" "PASS"
+        mkdir -p "$NFS_MOUNT"
+        if mount -t nfs -o soft,timeo=600,retrans=1 \
+                "${NFS_SERVER}:${NFS_PATH}" "$NFS_MOUNT" >/dev/null 2>&1; then
+            if mountpoint -q "$NFS_MOUNT"; then
+                result "NFS connected (${NFS_SERVER})" "PASS"
+                TEST_FILE="$NFS_MOUNT/.nfs_write_test_$$"
+                if touch "$TEST_FILE" >/dev/null 2>&1; then
+                    rm -f "$TEST_FILE"
+                    result "NFS write access (${NFS_PATH})" "PASS"
+                else
+                    result "NFS no write permission (${NFS_PATH})" "FAIL"
+                fi
+            else
+                result "NFS not active (${NFS_MOUNT})" "FAIL"
+            fi
+            if umount "$NFS_MOUNT" >/dev/null 2>&1; then
+                rmdir "$NFS_MOUNT" 2>/dev/null
+            else
+                result "NFS umount failed ($NFS_MOUNT)" "FAIL"
+            fi
+        else
+            result "NFS failed (${NFS_SERVER}:${NFS_PATH})" "FAIL"
+            rmdir "$NFS_MOUNT" 2>/dev/null
+        fi
+    else
+        result "NFS mount support" "FAIL"
+    fi
+else
+    result "NFS configuration not set" "FAIL"
 fi
 
 # end
