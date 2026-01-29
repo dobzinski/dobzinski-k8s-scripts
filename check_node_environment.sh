@@ -3,7 +3,7 @@
 #
 # Script to check the Rancher/RKE2 Operating System
 #  - by: Robson Dobzinski
-#  - review: 2026-01-28
+#  - review: 2026-01-29
 #
 ################################################################
 
