@@ -39,6 +39,7 @@ MOUNT_VAR=1              # 1=enabled, 0=disabled
 VAR_DISK_GB=100
 
 # data in /var (MOUNT_VAR needs to be set to 1)
+# list for sles / opensuse-leap
 #VAR_DATA=(
 #    "/var/log/messages"
 #    "/var/log/boot.log"
@@ -52,7 +53,6 @@ VAR_DATA=(
     "/var/log/dnf.log"
     "/var/log/boot.log"
 )
-# list for sles / opensuse-leap
 # list for ubuntu
 #VAR_DATA=(
 #    "/var/log/syslog"
