@@ -8,7 +8,7 @@ Scripts developed for use in Kubernetes.
 | [check_node_environment.sh](#checknodeenvironment) | Script to check Rancher/RKE2 OS environment |
 | [cleanup-namespaces.sh](#cleanupnamespaces) | Safe cleaning up the Namespaces from external list file |
 | [count-resources-namespaces.sh](#countresourcesnamespaces) | Creation of a table for counting resources in Namespaces using an external list file |
-
+| [annotation-volumes-excludes.sh](#annotationvolumesexcludes) | Script to search mount points in pod to be excluded from backups using Velero |
 
 ## <a id="automatedvelero" />automated-velero.sh
 
@@ -145,4 +145,27 @@ NMS | PDR | PDE | PVB | PVE
 ingress-nginx | 3 | 0 | 0 | 0
 kube-system | 24 | 0 | 0 | 0
 myapp1 | 1 | 0 | 1 | 0
+```
+
+## <a id="annotationvolumesexcludes" />annotation-volumes-excludes.sh
+
+[Open](./annotation-volumes-excludes.sh)
+
+**About**
+
+Make sure you have the "kubectl" binary installed and exported to the "PATH". You also need to export the KUBECONFIG file.
+
+If you need to search for the NFS mount points in pod without PVC and SMB driver mount points in pod to create annotation "backup.velero.io/backup-volumes-excludes=<volume>" in pod for skip backups using Velero.
+
+This script using an external list of namespaces from a file.
+
+**How to use**
+
+You need to create a new file and insert the namespaces to be deleted on each line. Then, open the script file to add this new external file to the "FILE" variable and remember to change the execution permissions
+
+```
+$ vi my-namespace-list
+$ vi annotation-volumes-excludes.sh
+$ chmod +x annotation-volumes-excludes.sh
+$ ./annotation-volumes-excludes.sh
 ```
